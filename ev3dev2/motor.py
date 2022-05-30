@@ -2695,7 +2695,7 @@ class MoveDifferential(MoveTank):
     def odometry_coordinates_log(self):
         log.debug("%s: odometry angle %s at (%d, %d)" % (self, math.degrees(self.theta), self.x_pos_mm, self.y_pos_mm))
 
-    def odometry_start(self, theta_degrees_start=90.0, x_pos_start=0.0, y_pos_start=0.0, sleep_time=0.005):  # 5ms
+    def odometry_start(self, theta_degrees_start=90.0, x_pos_start=0.0, y_pos_start=0.0, sleep_time=0.005, use_gyro=False):  # 5ms
         """
         Ported from:
         http://seattlerobotics.org/encoder/200610/Article3/IMU%20Odometry,%20by%20David%20Anderson.htm
@@ -2745,7 +2745,10 @@ class MoveDifferential(MoveTank):
                 mm = (left_mm + right_mm) / 2.0
 
                 # accumulate total rotation around our center
-                self.theta += (right_mm - left_mm) / self.wheel_distance_mm
+                if use_gyro:
+                    self.theta=self.gyro.circle_angle()
+                else:
+                    self.theta += (right_mm - left_mm) / self.wheel_distance_mm
 
                 # and clip the rotation to plus or minus 360 degrees
                 self.theta -= float(int(self.theta / TWO_PI) * TWO_PI)
